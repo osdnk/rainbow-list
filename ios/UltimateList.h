@@ -1,10 +1,6 @@
 #import <React/RCTBridgeModule.h>
+#import "rainbow-me-ultimate-list.h"
 
-#ifdef __cplusplus
-
-#import "example.h"
-
-#endif
 
 @interface UltimateList : NSObject <RCTBridgeModule>
 

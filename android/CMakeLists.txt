@@ -5,7 +5,7 @@ set (CMAKE_CXX_STANDARD 11)
 
 add_library(cpp
             SHARED
-            ../cpp/example.cpp
+            ../cpp/rainbow-me-ultimate-list.cpp
             cpp-adapter.cpp
 )
 
