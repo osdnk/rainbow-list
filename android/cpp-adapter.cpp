@@ -1,21 +1,20 @@
 #include <jni.h>
 #include <jsi/jsi.h>
 #include <memory>
-#include <fbjni/fbjni.h>
 #include <ReactCommon/CallInvokerHolder.h>
+#include <fbjni/fbjni.h>
 #include <react/jni/JavaScriptExecutorHolder.h>
 #include <android/log.h>
 
-#include "../../../../../../../../cpp/UltimateListInstaller.h"
+#include "../../../cpp/rainbow-me-ultimate-list.h"
 
-#include "Scheduler.h"
 
 #include <react/jni/CxxModuleWrapper.h>
 #include <react/jni/JMessageQueueThread.h>
-#include "ErrorHandler.h"
+//#include "ErrorHandler.h"
 #include <jni.h>
 #include <memory>
-#include "Logger.h"
+//#include "Logger.h"
 
 std::string jstring2string(JNIEnv *env, jstring jStr) {
     if (!jStr)
@@ -41,12 +40,11 @@ JavaVM* g_jvm = 0;
 
 
 using namespace facebook;
-using namespace reanimated;
 
 
 struct UltimateListModule : jni::JavaClass<UltimateListModule> {
 public:
-    __unused static constexpr auto kJavaDescriptor = "Lcom/ultimatelist/UltimateNativeModule;";
+    __unused static constexpr auto kJavaDescriptor = "Lcom/rainbowmeultimatelist/UltimateNativeModule;";
 
     static constexpr auto TAG = "rnultimatelist";
 

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.facebook.hermes.reactexecutor.HermesExecutorFactory;
 import com.facebook.proguard.annotations.DoNotStrip;
@@ -43,10 +44,21 @@ public class UltimateNativeModule extends ReactContextBaseJavaModule {
   public static native void moveFromPreSet(int id);
   public static native void setNotifier();
 
+  private ReactContext mContext;
 
   public UltimateNativeModule(ReactContext reactContext) {
     super();
+    mContext = reactContext;
     setNotifier();
+  }
+
+
+
+  @Override
+  public void initialize() {
+    long x = mContext.getJavaScriptContextHolder().get();
+    install(mContext.getJavaScriptContextHolder());
+    super.initialize();
   }
 
   @Keep
@@ -91,9 +103,7 @@ public class UltimateNativeModule extends ReactContextBaseJavaModule {
 
 
   // copied
-  public static void install(ReactApplicationContext context, JavaScriptContextHolder jsContext) {
-    CallInvokerHolderImpl holder = (CallInvokerHolderImpl) context.getCatalystInstance().getJSCallInvokerHolder();
-    SoLoader.init(context, false); // <-- required for makeJSExecutorFactory later on
+  public static void install(JavaScriptContextHolder jsContext) {
     installNative(jsContext.get());
   }
 
