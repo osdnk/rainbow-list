@@ -236,9 +236,8 @@ export function RecyclerView<TData>({
 
  // const datas = useDerivedValue(() => data, []);
   const datas = Platform.OS === 'ios' ? useSharedValue(data) : useDerivedValue(() => data, [data]);
- //Platform.OS === 'ios' && (datas.value = data);
-
   useImmediateEffect(() => {
+    Platform.OS === 'ios' && (datas.value = data);
     // @ts-ignore
     global._list___setData(traversedData, currId, prevData.current ? getDiffArray(prevData.current, traversedData) : undefined)
   }, [traversedData])
@@ -249,6 +248,15 @@ export function RecyclerView<TData>({
   prevData.current = traversedData;
 
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isJustCalledRefresh, setIsJustCalledRefresh] = useState(false)
+  // TODO
+  useEffect(() => {
+    if (isJustCalledRefresh && !isRefreshing) {
+      setIsJustCalledRefresh(false)
+      ref.current.setNativeProps({ isRefreshing: false })
+    }
+  },[isJustCalledRefresh])
+  const ref = useRef<React.MutableRefObject<any>>();
 
   return (
     <RawDataContext.Provider value={data}>
@@ -259,10 +267,14 @@ export function RecyclerView<TData>({
           {/*  shouldActivateOnStart*/}
           {/*>*/}
           <RecyclerListView
+            ref={ref}
             onRefresh={() => {
               console.log("XXX")
-              setIsRefreshing(true);
-              setTimeout(() => setIsRefreshing(false), 3000)
+              Platform.OS === 'android' && setIsJustCalledRefresh(true)
+              //setIsRefreshing(true);
+              //requestAnimationFrame(() => ref.current.setNativeProps({ isRefreshing: false }))
+              // setIsRefreshing(true);
+              // setTimeout(() => setIsRefreshing(false), 3000)
             }}
             isRefreshing={isRefreshing}
             id={currId}
