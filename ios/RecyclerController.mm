@@ -94,6 +94,11 @@
   [RecyclerController.lists setObject:self.controller forKey:self.identifier];
 }
 
+-(void)setOnRefresh:(RCTDirectEventBlock)onRefresh {
+  _onRefresh = onRefresh;
+  [_controller.refreshControl setEnabled:(onRefresh != nil)];
+}
+
 - (void)setIsRefreshing:(BOOL)isRefreshing {
   if (isRefreshing) {
     [_controller.refreshControl beginRefreshing];
@@ -184,6 +189,7 @@ static NSMutableDictionary<NSNumber *,RecyclerController *> * _lists;
   [_collectionView setBackgroundColor:[UIColor redColor]];
   _refreshControl = [[UIRefreshControl alloc] init];
   _refreshControl.tintColor = [UIColor grayColor];
+  [_refreshControl setEnabled:NO];
   [_refreshControl addTarget:self action:@selector(refershControlAction) forControlEvents:UIControlEventValueChanged];
   [_collectionView addSubview:_refreshControl];
   _collectionView.alwaysBounceVertical = YES;

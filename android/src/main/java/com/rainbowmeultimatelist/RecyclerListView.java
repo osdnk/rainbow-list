@@ -4,16 +4,44 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerListViewHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Dynamic;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
+import com.facebook.react.bridge.ReadableType;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.facebook.react.uimanager.events.RCTModernEventEmitter;
+import com.facebook.react.views.swiperefresh.ReactSwipeRefreshLayout;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 class RecyclerListView extends LinearLayout {
   private ThemedReactContext context;
   MyRecyclerViewAdapter adapter;
+  SwipeRefreshLayout mRefreshLayout;
   int mCount = -1;
   int mId = -1;
+  boolean mIsOnRefreshSet = false;
+
+  public void setIsRefreshing(boolean refreshing) {
+    mRefreshLayout.setRefreshing(refreshing);
+  }
+
+  public void setIsOnRefreshSet(boolean isOnRefreshSet) {
+    mIsOnRefreshSet = isOnRefreshSet;
+    mRefreshLayout.setEnabled(mIsOnRefreshSet);
+  }
 
   public void notifyNewData() {
     RecyclerView view = (RecyclerView) adapter.mView;
@@ -83,6 +111,11 @@ class RecyclerListView extends LinearLayout {
     this.context = context;
     inflate(context, R.layout.activity_main, this);
     RecyclerView recyclerView = findViewById(R.id.rvAnimals);
+    mRefreshLayout = findViewById(R.id.swipe_container);
+    mRefreshLayout.setOnRefreshListener(() -> {
+      //mRefreshLayout.setRefreshing(false);
+      context.getJSModule(RCTEventEmitter.class).receiveEvent(getId(), "onRefresh", Arguments.createMap());
+    });
     recyclerView.setLayoutManager(new StickyHeadersLinearLayoutManager(context));
     adapter = new MyRecyclerViewAdapter(context, recyclerView, this);
     // TODO osdnk
