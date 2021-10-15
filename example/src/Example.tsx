@@ -20,34 +20,34 @@ import type { DataCell } from './data';
 // HERE starts example
 function ContactCell() {
   const position = usePosition()
-  const data = useSharedDataAtIndex();
+  //const data = useSharedDataAtIndex();
   //const reactiveData = useReactiveDataA tIndex();
   //console.log(reactiveData)
   //const text = useDerivedValue(() => data.value?.name ?? data?.name ??'NONE');
   const text = useDerivedValue(() => "pos: " + position.value);
-  const color2 = useDerivedValue(() => data.value?.color);
-  const color = useDerivedValue(() => {
-    const name = data.value?.name ?? '';
-    const colors = ['red', 'green', 'blue', 'white', 'yellow'];
-    let hash = 0,
-      i,
-      chr;
-    if (name.length === 0) return hash;
-    for (i = 0; i < name.length - 2; i++) {
-      chr = name.charCodeAt(i);
-      hash = (hash << 5) - hash + chr;
-      hash |= 0;
-    }
-    return colors[Math.abs(hash) % 5];
-  });
+  //const color2 = useDerivedValue(() => data.value?.color);
+  //const color = useDerivedValue(() => {
+  //   const name = data.value?.name ?? '';
+  //   const colors = ['red', 'green', 'blue', 'white', 'yellow'];
+  //   let hash = 0,
+  //     i,
+  //     chr;
+  //   if (name.length === 0) return hash;
+  //   for (i = 0; i < name.length - 2; i++) {
+  //     chr = name.charCodeAt(i);
+  //     hash = (hash << 5) - hash + chr;
+  //     hash |= 0;
+  //   }
+  //   return colors[Math.abs(hash) % 5];
+  // });
   const circleStyle = useAnimatedStyle(() => ({
     opacity: (position?.value ?? 0 % 10) / 10,
     backgroundColor: 'red',
   }));
-  const circleStyle2 = useAnimatedStyle(() => ({
-    opacity: (data.value?.index ?? 0 % 10) / 10,
-    backgroundColor: 'red',
-  }));
+  // const circleStyle2 = useAnimatedStyle(() => ({
+  //   opacity: (data.value?.index ?? 0 % 10) / 10,
+  //   backgroundColor: 'red',
+  // }));
   //
   // const wrapperStyle = useAnimatedStyle(() => ({
   //   height: data.value.color === "green" ? 200 : 100,
@@ -99,17 +99,17 @@ function ContactCell() {
             },
           ]}
         />
-        <Animated.View
-          style={[
-            circleStyle2,
-            {
-              width: 30,
-              height: 30,
-              borderRadius: 30,
-              marginRight: 20,
-            },
-          ]}
-        />
+        {/*<Animated.View*/}
+        {/*  style={[*/}
+        {/*    circleStyle2,*/}
+        {/*    {*/}
+        {/*      width: 30,*/}
+        {/*      height: 30,*/}
+        {/*      borderRadius: 30,*/}
+        {/*      marginRight: 20,*/}
+        {/*    },*/}
+        {/*  ]}*/}
+        {/*/>*/}
         {/*<UltraFastText binding={name} />*/}
         {/*<UltraFastSwtich binding={"type"} >*/}
         {/*  <UltraFastCase type="loading"/>*/}
@@ -134,14 +134,13 @@ function ContactCell2() {
   } = useUltraFastData<DataCell>(); // const prof = "nested.prof"
 
   const data = useSharedDataAtIndex();
-  const reactiveData = useReactiveDataAtIndex();
+  console.log(data)
+ // const reactiveData = useReactiveDataAtIndex();
   //console.log(reactiveData)
-  //const text = useDerivedValue(() => data.value?.name ?? data?.name ??'NONE');
-  const text = useDerivedValue(() => { ; return data.value?.name });
-  const color2 = useDerivedValue(() => data.value?.color);
+  const text = useDerivedValue(() => data.value?.nested?.prof ??'NONE');
 
   const circleStyle = useAnimatedStyle(() => ({
-    backgroundColor: color2.value,
+    backgroundColor: "red",
   }));
 
   return (
@@ -153,11 +152,10 @@ function ContactCell2() {
 
       }}
     >
-      <UltraFastText binding={name} />
+      <ReText text={text} />
       <Animated.View
         style={[
           {
-            backgroundColor: reactiveData?.color,
             width: 30,
             height: 30,
             borderRadius: 30,

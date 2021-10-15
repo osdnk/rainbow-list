@@ -98,7 +98,7 @@ class RecyclerListView extends LinearLayout {
           if (child instanceof FrameLayout) {
             View row = ((FrameLayout) child).getChildAt(0);
             if (row instanceof RecyclerRow) {
-              ((RecyclerRow) row).renotifyUltraFastEvents();
+              ((RecyclerRow) row).recycle();
             }
           }
         }

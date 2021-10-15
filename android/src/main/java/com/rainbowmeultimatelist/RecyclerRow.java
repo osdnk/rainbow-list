@@ -1,5 +1,6 @@
 package com.rainbowmeultimatelist;
 
+import android.util.Log;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
 
@@ -41,6 +42,8 @@ class RecyclerRow extends ReactViewGroup {
     WritableMap mExtraData = Arguments.createMap();
     mExtraData.putInt("position", position);
     mExtraData.putInt("previousPosition", mPosition);
+
+    Log.d("onRecycler", "see" + position + " from " + mPosition + "   DDDD   ");
     mPosition = position;
     context.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(new Event(context.getSurfaceId(), getId()) {
       @Override
@@ -53,12 +56,34 @@ class RecyclerRow extends ReactViewGroup {
         return mExtraData;
       }
     });
+
+    WritableMap mExtraData2 = Arguments.createMap();
+    mExtraData2.putInt("position", position);
+    mExtraData2.putInt("previousPosition", mPosition);
+
+
+    context.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(new Event(context.getSurfaceId(), getId()) {
+      @Override
+      public String getEventName() {
+        return "onRecycleBackup";
+      }
+
+      @Override
+      protected WritableMap getEventData() {
+        return mExtraData2;
+      }
+    });
   }
 
   public void recycle(int position, JSValueGetter valueGetter) {
     mCachedValueGetter = valueGetter;
     notifyUltraFastEvents(valueGetter);
     notifyReanimatedComponents(position);
+  }
+
+  public void recycle() {
+    notifyUltraFastEvents(mCachedValueGetter);
+    notifyReanimatedComponents(mPosition);
   }
 
   @Override

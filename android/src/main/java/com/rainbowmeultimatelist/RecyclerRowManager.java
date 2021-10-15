@@ -44,6 +44,9 @@ class RecyclerRowManager extends ViewGroupManager<RecyclerRow> {
       .put(
         "onRecycle",
         MapBuilder.of("registrationName", "onRecycle"))
+      .put(
+        "onRecycleBackup",
+        MapBuilder.of("registrationName", "onRecycleBackup"))
       .build();
   }
 }

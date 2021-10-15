@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View, ViewProps, ViewStyle, TextInput, Platform } from 'react-native';
 import {
   CellStorage,
@@ -7,7 +7,13 @@ import {
   RecyclerRowWrapper as RawRecyclerRowWrapper,
   UltraFastTextWrapper,
 } from './ultimate';
-import Animated, { runOnJS, useSharedValue, useDerivedValue } from 'react-native-reanimated'
+import Animated, {
+  runOnJS,
+  useSharedValue,
+  useDerivedValue,
+  useWorkletCallback,
+  runOnUI,
+} from 'react-native-reanimated';
 // import {  } from './useImmediateDerivedValue';
 import { useAnimatedRecycleHandler } from './useAnimatedRecycleEvent';
 // @ts-ignore TODO osdnk
@@ -47,18 +53,16 @@ function useRawData() {
 
 
 export function useSharedDataAtIndex() {
-  const data = useData();
+  //const data = useData();
+  const { id, lastEdited } = useData()
   const position = usePosition();
   const initialPosition = useInitialPosition();
   const rawData = useRawData()!;
   return useDerivedValue(() => {
-    const v = data?.value?.[position!.value];
-    // Some reanimated 2.2 weirdness. fixme while updating to reanimated 2.3.x
-    // @ts-ignore
-    const isMainJS = !!global.__reanimatedModuleProxy;
-    const initialData = data?.value[initialPosition];
-    return v ? v : isMainJS ? { ...initialData } : initialData;
-  }, [rawData]);
+    lastEdited.value
+    console.log(lastEdited.value)
+    return global[`__ultimateList${id}`][position!.value]
+  }, []);
 }
 
 
@@ -87,20 +91,30 @@ function RecyclerRowWrapper(props) {
 export function RecyclerRow(props: ViewProps) {
 
 
+  const [isBackupNeeded, setIsBackupNeeded] = useState<boolean>(true)
   const position = useContext(PositionContext);
   const initialPosition = useContext(InitialPositionContext);
   //useState(() => (position.value = props.initialPosition))
-  const onRecycleHandler = useAnimatedRecycleHandler({ onRecycle: (e) => {
-    'worklet';
-    console.log(e)
-    position!.value = e.position;
-  }});
+  const onRecycleHandler = useAnimatedRecycleHandler({ onRecycle: ({ position: newPosition, previousPosition }) => {
+      'worklet';
+      console.log(newPosition, previousPosition)
+      if (isBackupNeeded) {
+        runOnJS(setIsBackupNeeded)(false);
+      }
+      position!.value = newPosition
+
+    }}, [isBackupNeeded]);
+
+  const onRecycleHandlerBackup = useCallback(({ nativeEvent: { position: newPosition } }) => {
+      position!.value = newPosition
+
+    }, []);
 
 
   // TODO osdnk sometimes broken
 
   return (
-      <AnimatedRecyclableRow {...props} onRecycle={onRecycleHandler} initialPosition={initialPosition}   />
+      <AnimatedRecyclableRow {...props} onRecycle={onRecycleHandler} onRecycleBackup={isBackupNeeded ? onRecycleHandlerBackup : null} initialPosition={initialPosition}   />
   );
 }
 
@@ -234,10 +248,21 @@ export function RecyclerView<TData>({
   })), [data, getIsSticky, getIsSticky, getHash])
   const prevData = useRef<TraversedData<TData>[]>()
 
+
+
  // const datas = useDerivedValue(() => data, []);
-  const datas = Platform.OS === 'ios' ? useSharedValue(data) : useDerivedValue(() => data, [data]);
+  const datas = useSharedValue<number>(0)
+  //const datas = Platform.OS === 'ios' ? useSharedValue(data) : useDerivedValue(() => data, [data]);
   useImmediateEffect(() => {
-    Platform.OS === 'ios' && (datas.value = data);
+   // Platform.OS === 'ios' && (datas.value = data);
+    // @ts-ignore
+    global[`__ultimateList${currId}`] = data
+    runOnUI(() => {
+      "worklet";
+      // @ts-ignore
+      global[`__ultimateList${currId}`] = data
+      datas.value = Date.now();
+    })()
     // @ts-ignore
     global._list___setData(traversedData, currId, prevData.current ? getDiffArray(prevData.current, traversedData) : undefined)
   }, [traversedData])
@@ -260,7 +285,7 @@ export function RecyclerView<TData>({
 
   return (
     <RawDataContext.Provider value={data}>
-      <DataContext.Provider value={datas}>
+      <DataContext.Provider value={{ id: currId, lastEdited: datas  }}>
         <View style={style} removeClippedSubviews={false}>
           <RecyclableViews viewTypes={layoutProvider}/>
           {/*<NativeViewGestureHandler*/}
