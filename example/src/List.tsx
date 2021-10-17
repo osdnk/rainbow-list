@@ -60,7 +60,7 @@ export function useSharedDataAtIndex() {
   const rawData = useRawData()!;
   return useDerivedValue(() => {
     lastEdited.value
-    console.log(lastEdited.value)
+    console.log(lastEdited.value, global[`__ultimateList${id}`][position!.value])
     return global[`__ultimateList${id}`][position!.value]
   }, []);
 }
@@ -254,7 +254,7 @@ export function RecyclerView<TData>({
   const datas = useSharedValue<number>(0)
   //const datas = Platform.OS === 'ios' ? useSharedValue(data) : useDerivedValue(() => data, [data]);
   useImmediateEffect(() => {
-   // Platform.OS === 'ios' && (datas.value = data);
+    // Platform.OS === 'ios' && (datas.value = data);
     // @ts-ignore
     global[`__ultimateList${currId}`] = data
     runOnUI(() => {
@@ -266,6 +266,15 @@ export function RecyclerView<TData>({
     // @ts-ignore
     global._list___setData(traversedData, currId, prevData.current ? getDiffArray(prevData.current, traversedData) : undefined)
   }, [traversedData])
+
+
+  useEffect(() => {
+    // for ReText
+    setTimeout(runOnUI(() => {
+      "worklet";
+      datas.value = Date.now() - 10;
+    }), 100)
+  }, [])
 
   // @ts-ignore
   useEffect(() => () => global._list___removeData(currId), [])
