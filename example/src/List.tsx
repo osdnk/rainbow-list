@@ -201,15 +201,26 @@ function RecyclableViewsByType({
   type: string;
   maxRendered: number | undefined;
 }) {
+  const [isBackupNeeded, setIsBackupNeeded] = useState<boolean>(true);
   const [cells, setCells] = useState<number>(2);
   const onMoreRowsNeededHandler = useAnimatedRecycleHandler(
     {
       onMoreRowsNeeded: (e) => {
         'worklet';
         runOnJS(setCells)(e.cells);
+        runOnJS(setIsBackupNeeded)(false);
       },
     },
     [setCells]
+  );
+
+  const onMoreRowsNeededHandlerBackup = useCallback(
+    (e: { nativeEvent: { cells: number } }) => {
+      if (e.nativeEvent.cells > cells) {
+        setCells(e.nativeEvent.cells);
+      }
+    },
+    [cells]
   );
 
   return (
@@ -219,12 +230,9 @@ function RecyclableViewsByType({
       type={type}
       typeable={type}
       onMoreRowsNeeded={onMoreRowsNeededHandler}
-      onMoreRowsNeededBackup={(e: { nativeEvent: { cells: any } }) => {
-        const cellsn = e.nativeEvent.cells;
-        if (cellsn > cells) {
-          setCells(cellsn);
-        }
-      }}
+      onMoreRowsNeededBackup={
+        isBackupNeeded ? onMoreRowsNeededHandlerBackup : undefined
+      }
     >
       {[
         ...Array(Math.min(maxRendered, Math.max(PRERENDERED_CELLS, cells))),
