@@ -1,6 +1,10 @@
+// @ts-disable
 import React, { useCallback } from 'react';
 import { Text, View } from 'react-native';
-import Animated, { useAnimatedStyle, useDerivedValue } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useDerivedValue,
+} from 'react-native-reanimated';
 import { ReText } from 'react-native-redash';
 import {
   RecyclerRow,
@@ -9,22 +13,13 @@ import {
   useRowTypesLayout,
   useSharedDataAtIndex,
   useUltraFastData,
-  usePosition, useReactiveDataAtIndex,
+  usePosition,
 } from './List';
 import type { DataCell } from './data';
 
-
-// const List = createList<Data>();
-// const { WrapperList, useUltraFastSomething, useSharedDataAtIndex, useData } = List;
-
-// HERE starts example
 function ContactCell() {
-  const position = usePosition()
-  //const data = useSharedDataAtIndex();
-  //const reactiveData = useReactiveDataA tIndex();
-  //console.log(reactiveData)
-  //const text = useDerivedValue(() => data.value?.name ?? data?.name ??'NONE');
-  const text = useDerivedValue(() => "pos: " + position.value);
+  const position = usePosition();
+  const text = useDerivedValue(() => 'pos: ' + position!.value);
   //const color2 = useDerivedValue(() => data.value?.color);
   //const color = useDerivedValue(() => {
   //   const name = data.value?.name ?? '';
@@ -54,28 +49,29 @@ function ContactCell() {
   // }));
 
   const {
-    name,
     nested: { prof },
   } = useUltraFastData<DataCell>(); // const pr of = "nested.prof"
 
   return (
     <RecyclerRow
-      type="type1"
-      style={{
-        //height: reactiveData?.color === "green" ? 200 : 100,
-
-      }}
+      style={
+        {
+          //height: reactiveData?.color === "green" ? 200 : 100,
+        }
+      }
     >
       <View
-        style={[{
-          // height: reactiveData?.color === "green" ? 200 : 100,
-          height: 100,
-          borderWidth: 2,
-          backgroundColor: 'grey',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'row',
-        }]}
+        style={[
+          {
+            // height: reactiveData?.color === "green" ? 200 : 100,
+            height: 100,
+            borderWidth: 2,
+            backgroundColor: 'grey',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'row',
+          },
+        ]}
       >
         {/*<Animated.View*/}
         {/*  style={[*/}
@@ -117,8 +113,7 @@ function ContactCell() {
 
         {/*<UltraFastText binding={name} />*/}
         <ReText text={text} style={{ width: 120 }} />
-        <UltraFastText binding={name} />
-
+        <UltraFastText binding={prof} />
 
         {/*<RecyclableText style={{ width: '70%' }}>Beata Kozidrak</RecyclableText>*/}
       </View>
@@ -126,30 +121,25 @@ function ContactCell() {
   );
 }
 
-
 function ContactCell2() {
-
-  const {
-    name,
-  } = useUltraFastData<DataCell>(); // const prof = "nested.prof"
+  // const { name } = useUltraFastData<DataCell>(); // const prof = "nested.prof"
 
   const data = useSharedDataAtIndex();
-  console.log(data)
- // const reactiveData = useReactiveDataAtIndex();
+  // const reactiveData = useReactiveDataAtIndex();
   //console.log(reactiveData)
-  const text = useDerivedValue(() => data.value?.nested?.prof ??'NONE');
+  const text = useDerivedValue(() => {
+    return data.value?.nested?.prof ?? 'NONE';
+  });
 
   const circleStyle = useAnimatedStyle(() => ({
-    backgroundColor: "red",
+    backgroundColor: 'red',
   }));
 
   return (
     <RecyclerRow
-      type="type2"
       style={{
         height: 80,
         //height: reactiveData?.color === "green" ? 200 : 100,
-
       }}
     >
       <ReText text={text} />
@@ -178,52 +168,47 @@ function ContactCell2() {
   );
 }
 
-
 function HeaderCell() {
-
   return (
     <RecyclerRow
-      type="type2"
       style={{
         height: 70,
-        backgroundColor: "blue"
+        backgroundColor: 'blue',
         //height: reactiveData?.color === "green" ? 200 : 100,
-
       }}
     >
-      <Text>
-        Header
-      </Text>
+      <Text>Header</Text>
     </RecyclerRow>
   );
 }
 
-
-export default function Example({ data } : { data: DataCell[] }) {
+export default function Example({ data }: { data: DataCell[] }) {
   const layoutProvider = useRowTypesLayout(() => ({
     header: {
-      view: <HeaderCell/>,
-      maxRendered: 2
+      view: <HeaderCell />,
+      maxRendered: 2,
     },
-    type1: <ContactCell/>,
-    type2: <ContactCell2/>
-  }))
+    type1: <ContactCell />,
+    type2: <ContactCell2 />,
+  }));
 
-  const getViewType = useCallback((d) => d.index === 0 ? "header" : d.index %2 === 0 ? "type2" : "type1", [])
-  const isSticky = useCallback((_, __, i) => i === 0, [])
-  const getHash = useCallback((d) => d.name, [])
+  const getViewType = useCallback(
+    (d) => (d.index === 0 ? 'header' : d.index % 2 === 0 ? 'type2' : 'type1'),
+    []
+  );
+  const isSticky = useCallback((_, __, i) => i === 0, []);
+  const getHash = useCallback((d) => d.name, []);
 
   return (
     <>
-    <RecyclerView<DataCell>
-      getViewType={getViewType}
-      data={data}
-      getIsSticky={isSticky}
-      getHash={getHash}
-      layoutProvider={layoutProvider}
-      style={{ width: '100%', height: 600 }}
-    />
-      </>
-
+      <RecyclerView<DataCell>
+        getViewType={getViewType}
+        data={data}
+        getIsSticky={isSticky}
+        getHash={getHash}
+        layoutProvider={layoutProvider}
+        style={{ width: '100%', height: 600 }}
+      />
+    </>
   );
 }
